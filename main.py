@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # languages = ["cn", "en", "bm"]
     #browsers = ["chrome", "firefox","edge","safari"]
     languages = ["cn", "en", "bm"]
-    browsers = ["chrome", "firefox"]
+    browsers = ["firefox"]
     processes = []
 
     for browser in browsers:
