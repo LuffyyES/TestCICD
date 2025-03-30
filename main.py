@@ -211,8 +211,8 @@ def run_tests(language, browser):
 if __name__ == "__main__":
     # languages = ["cn", "en", "bm"]
     #browsers = ["chrome", "firefox","edge","safari"]
-    languages = ["cn", "en", "bm"]
-    browsers = ["firefox"]
+    languages = ["cn"]
+    browsers = ["chrome"]
     processes = []
 
     for browser in browsers:
