@@ -1,0 +1,2 @@
+This is a test file with invalid format for profile picture upload.
+This file is used to test how the application handles invalid file format uploads for profile pictures. 
