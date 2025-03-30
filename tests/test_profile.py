@@ -59,8 +59,6 @@ class TestProfilePage(BaseTest):
             raise ValueError("Browser or language is not set.")
         self.logger.info(f"Setting up {self.browser} browser for {self.language} language...")
         self.driver = self.initialize_browser(self.browser)
-        assert self.driver is not None, "Browser initialization failed!"
-
         self.url = LANGUAGE_SETTINGS[self.language]["home_url"]
         self.driver.get(self.url)
         # self.driver.maximize_window()
