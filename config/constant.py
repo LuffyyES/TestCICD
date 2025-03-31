@@ -1,4 +1,4 @@
-HEADLESS = False
+HEADLESS = Truez
 
 API_URL = "https://staging.sosyokmy.com/whitelabel-staging-2/public"
 
