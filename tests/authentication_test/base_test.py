@@ -263,26 +263,28 @@ class BaseTest(unittest.TestCase):
         AccPassword_page.click()
 
     def annoucement_close_button(self):
+        action = ActionChains(self.driver)
         try:
             close_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "announcement-close-button")))
 
-            close_button.click()
+            action.move_to_element(close_button).click().perform()
         except TimeoutException:
             self.logger.info("No announcement popup found")
             pass
 
     def daily_checkin_close_button(self, close_mission=True):
+        action = ActionChains(self.driver)
         try:
             close_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "close-modal-button")))
 
-            close_button.click()
+            action.move_to_element(close_button).click().perform()
             time.sleep(2)
             if close_mission:
                 close_button = WebDriverWait(self.driver,
                                              10).until(EC.element_to_be_clickable((By.ID, "not-yet-check-in-close")))
-                close_button.click()
+                action.move_to_element(close_button).click().perform()
                 time.sleep(2)
         except TimeoutException:
             self.logger.info("No checkin popup found")
