@@ -310,14 +310,15 @@ class BaseTest(unittest.TestCase):
         return WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((locator_type, locator_value)))
 
     def enter_credentials(self, username, password):
+        action = ActionChains(self.driver)
         try:
             username_field = self.get_field("login_id", "login")
             username_field.clear()
-            username_field.send_keys(username)
+            action.move_to_element(username_field).send_keys(username).perform()
 
             password_field = self.get_field("password", "login")
             password_field.clear()
-            password_field.send_keys(password)
+            action.move_to_element(password_field).send_keys(password).perform()
 
         except Exception as e:
             self.logger.error(f"Error while entering credentials: {str(e)}")
