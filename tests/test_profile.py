@@ -306,7 +306,7 @@ class TestProfilePage(BaseTest):
 
         try:
             self.logger.info("Starting gallery upload test...")
-            self.setup_test_user(register_new=True)
+            self.setup_test_user(register_new=False)
             self.navigate_to_profile_page(self.language)
             
             # upload
