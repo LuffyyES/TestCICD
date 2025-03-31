@@ -27,27 +27,6 @@ jobs:
           rm -rf chromedriver-linux64 chromedriver-linux64.zip
           google-chrome --version && chromedriver --version
 
-      # ✅ **安装 Firefox 136.0.4 & Geckodriver 0.36.0**
-      - name: Install Firefox & Geckodriver
-        run: |
-          sudo apt install -y firefox
-          wget "https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz"
-          tar -xzf geckodriver-v0.36.0-linux64.tar.gz
-          sudo mv geckodriver /usr/local/bin/
-          rm geckodriver-v0.36.0-linux64.tar.gz
-          firefox --version && geckodriver --version
-
-      # ✅ **安装 Edge & Edge WebDriver 134.0.3124.95**
-      - name: Install Microsoft Edge & Edge WebDriver
-        run: |
-          sudo apt update
-          sudo apt install -y microsoft-edge-stable
-          wget -q "https://msedgedriver.azureedge.net/134.0.3124.95/edgedriver_linux64.zip"
-          unzip edgedriver_linux64.zip
-          sudo mv msedgedriver /usr/local/bin/
-          rm edgedriver_linux64.zip
-          microsoft-edge --version && msedgedriver --version
-
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
