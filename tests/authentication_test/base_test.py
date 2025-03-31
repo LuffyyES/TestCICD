@@ -287,6 +287,8 @@ class BaseTest(unittest.TestCase):
                                              10).until(EC.element_to_be_clickable((By.ID, "not-yet-check-in-close")))
                 action.move_to_element(close_button).click().perform()
                 time.sleep(2)
+            else:
+                self.logger.info("No checkin popup found")
         except TimeoutException:
             self.logger.info("No checkin popup found")
             pass
