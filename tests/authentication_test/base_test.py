@@ -159,10 +159,11 @@ class BaseTest(unittest.TestCase):
 
     #id
     def navigate_to_login_page(self):
+        action = ActionChains(self.driver)
         self.annoucement_close_button()
         loginPage_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "unlogged-login-button")))
-        loginPage_button.click()
+        action.move_to_element(loginPage_button).click().perform()
 
     def verify_login(self, expected_username):
         self.annoucement_close_button()
