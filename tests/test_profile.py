@@ -14,6 +14,9 @@ import requests
 from urllib.parse import urlparse, unquote
 from selenium.webdriver.common.action_chains import ActionChains
 from tests.test_init import TestInit
+from selenium.webdriver.common.keys import Keys
+import pyautogui
+
 
 class HomepageData(BaseTest):
     """Class to manage homepage data and operations"""
@@ -306,7 +309,7 @@ class TestProfilePage(BaseTest):
 
         try:
             self.logger.info("Starting gallery upload test...")
-            self.setup_test_user(register_new=False)
+            self.setup_test_user(register_new=True)
             self.navigate_to_profile_page(self.language)
             
             # upload
@@ -364,11 +367,14 @@ class TestProfilePage(BaseTest):
     #     try:
     #         # Large File
     #         self.logger.info("Starting large file upload test...")
+    #         self.setup_test_user(register_new=True)
+    #         self.navigate_to_profile_page(self.language)
     #         edit_button = WebDriverWait(driver, 10).until(
     #             EC.element_to_be_clickable((By.ID, "edit-avatar-button"))
     #         )
     #         edit_button.click()
     #         self.upload_from_gallery(checkLargeFile=True)
+            
     #         self.check_general_error(LANGUAGE_SETTINGS[self.language]["errors"]["large_file_type"], id="swal2-title")
     #     except Exception as e:
     #         self.fail(f"Test failed with error: {str(e)}")
@@ -412,6 +418,7 @@ class TestProfilePage(BaseTest):
     #     try:
     #         self.logger.info("Starting balance test...")
     #         self.setup_test_user(register_new=False)
+                        
     #         self.navigate_to_profile_page(self.language)
             
     #         home_user_data = HomepageData.user_api(self, self.username, self.password)
@@ -443,7 +450,7 @@ class TestProfilePage(BaseTest):
     #         x_offset = width - 5  
             
     #         # click right side of the button
-    #         self.action.move_to_element(balance_button).move_by_offset(x_offset/2, 0).click().perform()
+    #         self.action.move_to_element(balance_button).move_by_offset(x_offset/2 - 10, 0).click().perform()
             
     #         # wait for the redirected url
     #         WebDriverWait(self.driver, 45).until(
@@ -460,9 +467,6 @@ class TestProfilePage(BaseTest):
     #         self.logger.info("Starting BBPoints test...")
     #         self.setup_test_user(register_new=False)
     #         self.navigate_to_profile_page(self.language)
-            
-    #         home_user_data = HomepageData.user_api(self, self.username, self.password)
-    #         self.logger.info(f"User data: {home_user_data}")
 
     #         bbpoints_text = self.wait_for_element(By.ID, "balance-bb").text
     #         self.logger.info(f"BBPoints text: {bbpoints_text}")
@@ -485,7 +489,7 @@ class TestProfilePage(BaseTest):
     #         x_offset = width - 5  
             
     #         # click right side of the button
-    #         self.action.move_to_element(bbpoints_button).move_by_offset(x_offset/2, 0).click().perform()
+    #         self.action.move_to_element(bbpoints_button).move_by_offset(x_offset/2 - 10, 0).click().perform()
                         
     #         # wait for the redirected url
     #         WebDriverWait(self.driver, 45).until(

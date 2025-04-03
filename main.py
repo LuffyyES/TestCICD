@@ -211,22 +211,16 @@ def run_tests(language, browser):
 if __name__ == "__main__":
     # languages = ["cn", "en", "bm"]
     #browsers = ["chrome", "firefox","edge","safari"]
-    languages = ["cn"]
-    browsers = ["chrome"]
+    languages = ["bm"]
+    browsers = ["firefox"]
     processes = []
 
     for browser in browsers:
-        if browser == "safari":
-            # run 1 by 1
-            for language in languages:
-                logging.info(f"Starting test run for language: {language}, browser: {browser}")
-                run_tests(language, browser)
-        else:
-            for language in languages:
-                logging.info(f"Starting test run for language: {language}, browser: {browser}")
-                process = multiprocessing.Process(target=run_tests, args=(language, browser))
-                process.start()
-                processes.append(process)
+        for language in languages:
+            logging.info(f"Starting test run for language: {language}, browser: {browser}")
+            process = multiprocessing.Process(target=run_tests, args=(language, browser))
+            process.start()
+            processes.append(process)
 
     for process in processes:
         process.join()

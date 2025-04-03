@@ -23,6 +23,7 @@ from config.constant import HEADLESS, CREDENTIALS, LANGUAGE_SETTINGS, PROFILE_UR
 import tempfile
 import requests
 import string
+import json
 from urllib.parse import urlparse
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.safari.webdriver import SafariRemoteConnection
@@ -57,6 +58,10 @@ class BaseTest(unittest.TestCase):
             options = ChromeOptions()
             if HEADLESS:
                 options.add_argument("--headless")
+            
+            options.add_argument("allow-file-access-from-files");
+            options.add_argument("use-fake-device-for-media-stream");
+            options.add_argument("use-fake-ui-for-media-stream"); 
             service = ChromeService()
             return webdriver.Chrome(service=service, options=options)
         elif browser == "firefox":
@@ -91,18 +96,25 @@ class BaseTest(unittest.TestCase):
             firefox_options.set_preference("browser.safebrowsing.enabled", False)
             if HEADLESS:
                 options.add_argument("--headless")
+            firefox_options.set_preference("media.navigator.streams.fake", True)
+            firefox_options.set_preference("media.navigator.permission.disabled", True)
             service = FirefoxService()
             return webdriver.Firefox(service=service, options=options)
         elif browser == "safari":
             options = SafariOptions()
             if HEADLESS:
                 options.add_argument("--headless")
+            options.set_capability("safari:useSimulatedSensor", True)
+            options.set_capability("safari:simulateUserMedia", True)
             service = SafariService()
             return webdriver.Safari(service=service, options=options)
         elif browser == "edge":
             options = EdgeOptions()
             if HEADLESS:
                 options.add_argument("--headless")
+            options.add_argument("allow-file-access-from-files");
+            options.add_argument("use-fake-device-for-media-stream");
+            options.add_argument("use-fake-ui-for-media-stream"); 
             service = EdgeService()
             return webdriver.Edge(service=service, options=options)
         else:
@@ -113,7 +125,7 @@ class BaseTest(unittest.TestCase):
         self.language = language
         self.browser = browser
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(f"{self.__class__.__name__}_{browser}_{language}")
         self.logger.setLevel(logging.INFO)
 
         for handler in self.logger.handlers[:]:
@@ -125,13 +137,22 @@ class BaseTest(unittest.TestCase):
             file_handler = logging.FileHandler(log_filename, mode='a', encoding='utf-8')
             file_handler.setLevel(logging.INFO)
 
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            formatter = logging.Formatter('%(asctime)s - %(name)s - [%(browser)s/%(language)s] - %(levelname)s - %(message)s')
             file_handler.setFormatter(formatter)
 
             self.logger.addHandler(file_handler)
             self.logger.propagate = False
 
-            self.logger.info(f"Logger initialized for {self.__class__.__name__}")
+            class ContextFilter(logging.Filter):
+                def filter(self, record):
+                    record.browser = browser
+                    record.language = language
+                    return True
+                    
+            context_filter = ContextFilter()
+            self.logger.addFilter(context_filter)
+
+            self.logger.info(f"Logger initialized for {self.__class__.__name__} with browser={browser}, language={language}")
         except Exception as e:
             print(f"Error setting up logger: {str(e)}")
 
@@ -159,11 +180,10 @@ class BaseTest(unittest.TestCase):
 
     #id
     def navigate_to_login_page(self):
-        action = ActionChains(self.driver)
         self.annoucement_close_button()
         loginPage_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "unlogged-login-button")))
-        action.move_to_element(loginPage_button).click().perform()
+        loginPage_button.click()
 
     def verify_login(self, expected_username):
         self.annoucement_close_button()
@@ -264,31 +284,27 @@ class BaseTest(unittest.TestCase):
         AccPassword_page.click()
 
     def annoucement_close_button(self):
-        action = ActionChains(self.driver)
         try:
             close_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "announcement-close-button")))
 
-            action.move_to_element(close_button).click().perform()
+            close_button.click()
         except TimeoutException:
             self.logger.info("No announcement popup found")
             pass
 
     def daily_checkin_close_button(self, close_mission=True):
-        action = ActionChains(self.driver)
         try:
             close_button = WebDriverWait(self.driver,
                                          10).until(EC.element_to_be_clickable((By.ID, "close-modal-button")))
 
-            action.move_to_element(close_button).click().perform()
+            close_button.click()
             time.sleep(2)
             if close_mission:
                 close_button = WebDriverWait(self.driver,
                                              10).until(EC.element_to_be_clickable((By.ID, "not-yet-check-in-close")))
-                action.move_to_element(close_button).click().perform()
+                close_button.click()
                 time.sleep(2)
-            else:
-                self.logger.info("No checkin popup found")
         except TimeoutException:
             self.logger.info("No checkin popup found")
             pass
@@ -312,15 +328,14 @@ class BaseTest(unittest.TestCase):
         return WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((locator_type, locator_value)))
 
     def enter_credentials(self, username, password):
-        action = ActionChains(self.driver)
         try:
             username_field = self.get_field("login_id", "login")
             username_field.clear()
-            action.move_to_element(username_field).send_keys(username).perform()
+            username_field.send_keys(username)
 
             password_field = self.get_field("password", "login")
             password_field.clear()
-            action.move_to_element(password_field).send_keys(password).perform()
+            password_field.send_keys(password)
 
         except Exception as e:
             self.logger.error(f"Error while entering credentials: {str(e)}")
@@ -844,25 +859,30 @@ class BaseTest(unittest.TestCase):
 
         response = requests.get(url)
 
-        if isReject:
-            if response.status_code == 200:
-                self.logger.info(f"Successfully rejected deposit for ID {ID}")
-            else:
-                self.logger.error(f"Failed to reject. Status code: {response.status_code}")
-                self.fail("Reject deposit failed")
-        elif isProcessing:
-            if response.status_code == 200:
-                self.logger.info(f"Successfully processing deposit for ID {ID}")
-            else:
-                self.logger.error(f"Failed to processing. Status code: {response.status_code}")
-                self.fail("Processing deposit failed")
+        MAX_RETRIES = 3
 
-        else:
+        for attempt in range(MAX_RETRIES):
             if response.status_code == 200:
-                self.logger.info(f"Successfully approved deposit for ID {ID}")
+                if isReject:
+                    self.logger.info(f"Successfully rejected deposit for ID {ID}")
+                elif isProcessing:
+                    self.logger.info(f"Successfully processing deposit for ID {ID}")
+                else:
+                    self.logger.info(f"Successfully approved deposit for ID {ID}")
+                break
             else:
-                self.logger.error(f"Failed to approve. Status code: {response.status_code}")
-                self.fail("Approve deposit failed")
+                self.logger.error(
+                    f"Attempt {attempt+1}: Failed to process deposit. Status code: {response.status_code}"
+                )
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(1)
+                else:
+                    if isReject:
+                        self.fail("Reject deposit failed")
+                    elif isProcessing:
+                        self.fail("Processing deposit failed")
+                    else:
+                        self.fail("Approve deposit failed")
 
     def generic_submit(
         self, field=None, expected_result=None, check_general_error=None, check_ewallet_number=None,
@@ -1591,7 +1611,8 @@ class BaseTest(unittest.TestCase):
         BalanceStr = self.check_balance(language=self.language, return_balance=True)
         if not BalanceStr:
             self.fail("Cannot get initial balance")
-        walletBalance = float(BalanceStr.replace(',', ''))
+        #walletBalance = float(BalanceStr.replace(',', ''))
+        walletBalance = float(BalanceStr.replace("MYR", "").replace(",", "").strip())
         self.logger.info(f"Initial Balance: {walletBalance:.2f}")
         return walletBalance
 
@@ -2318,24 +2339,62 @@ class BaseTest(unittest.TestCase):
             "username": username,
             "password": password
         }
-        response = requests.post(f"{CREDENTIALS['BO_base_url']}/api/v2/login", json=payload)
-        response.raise_for_status()
-        data = response.json()
 
-        if data.get("code") == 200:
-            token = data["data"]["token"]
-            self.logger.info("Login successful!")
-            return token
-        else:
-            self.logger.error(f"Login failed: {data.get('message')}")
-            return None
+        max_retries = 3
+        retry_count = 0
 
-    def get_game_ids(self, headers):
-        response = requests.get(f"{CREDENTIALS['BO_base_url']}/api/transfers", headers=headers)
-        response.raise_for_status()
-        result = response.json().get("data")
-        result = sorted(self.parse_game_ids(result), key=lambda x: x["id"])
-        return result
+        while retry_count < max_retries:
+            try:
+                response = requests.post(f"{CREDENTIALS['BO_base_url']}/api/v2/login", json=payload)
+                response.raise_for_status()
+                data = response.json()
+
+                if data.get("code") == 200:
+                    token = data["data"]["token"]
+                    self.logger.info("Login successful!")
+                    return token
+                else:
+                    self.logger.warning(f"Login attempt {retry_count + 1} failed: {data.get('message')}")
+                    retry_count += 1
+                    time.sleep(2)
+            except Exception as e:
+                self.logger.warning(f"Login attempt {retry_count + 1} failed with error: {str(e)}")
+                retry_count += 1
+                time.sleep(1)
+
+        self.logger.error("Login failed after maximum retries")
+        return None
+
+    def get_game_ids(self, headers, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(f"{CREDENTIALS['BO_base_url']}/api/transfers", headers=headers)
+
+                if response.status_code == 200:
+                    result = response.json().get("data")
+                    result = sorted(self.parse_game_ids(result), key=lambda x: x["id"])
+                    self.logger.info(f"Game IDs: {result}")
+                    return result
+
+                self.logger.warning(f"Attempt {attempt + 1} failed. Status code: {response.status_code}")
+
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    self.logger.info(f"Waiting {wait_time} seconds before retry")
+                    time.sleep(wait_time)
+
+            except requests.RequestException as e:
+                self.logger.error(f"Attempt {attempt + 1} failed. Error: {e}")
+
+                # If not the last attempt, wait before retrying
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    self.logger.info(f"Waiting {wait_time} seconds before retry")
+                    time.sleep(wait_time)
+
+        # If all attempts fail
+        self.logger.error("Failed to retrieve game IDs after all retries")
+        return []
 
     def parse_game_ids(self, data):
         account_game_list = []
@@ -2665,3 +2724,69 @@ class BaseTest(unittest.TestCase):
 
         response = requests.request("POST", CREDENTIALS['UpdateBetResult'].format(BO_base_url = CREDENTIALS["BO_base_url"]), headers=headers, data=payload, files=files)
         response.raise_for_status()
+
+    def check_contact_us(self, target_platform):
+        contact_us_api = CREDENTIALS.get("ContactUs", "")
+        if not contact_us_api:
+            self.fail("ContactUs API URL is missing in CREDENTIALS")
+
+        self.logger.info(f"Making request to contact API: {contact_us_api}")
+
+        try:
+            response = requests.get(contact_us_api, timeout=10)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            self.fail(f"Failed to fetch contact information: {str(e)}")
+
+        try:
+            contact_us_data = response.json()
+            self.logger.info(f"Raw API response: {contact_us_data}")
+        except json.JSONDecodeError:
+            self.fail("Failed to parse contact information response as JSON")
+
+            # Handle the case where "value" is a JSON string that needs to be parsed again
+        value_data = contact_us_data.get("data", {}).get("value", "")
+
+        # Check if value is a string (JSON string) that needs to be parsed
+        if isinstance(value_data, str):
+            self.logger.info("Value is a JSON string, parsing it...")
+            try:
+                # Parse the nested JSON string
+                contact_methods = json.loads(value_data)
+                self.logger.info(f"Parsed contact methods: {contact_methods}")
+            except json.JSONDecodeError:
+                self.fail("Failed to parse the nested JSON in the 'value' field")
+        else:
+            # If it's already parsed as a list
+            contact_methods = value_data
+            self.logger.info(f"Value is already a list: {contact_methods}")
+
+        ai_whatsapp_info = None
+        if isinstance(contact_methods, list):
+            for method in contact_methods:
+                if isinstance(method, dict) and method.get("platform") == target_platform:
+                    ai_whatsapp_info = method
+                    break
+        else:
+            self.fail(f"Expected contact methods to be a list, but got: {type(contact_methods)}")
+
+        if not ai_whatsapp_info:
+            self.fail("AI Whatsapp contact information not found in API response")
+
+        ai_whatsapp_url = ai_whatsapp_info["value"]
+        if not ai_whatsapp_url:
+            self.fail("AI Whatsapp URL is missing in API response")
+
+        self.logger.info(f"Expected AI Whatsapp URL: {ai_whatsapp_url}")
+
+        WebDriverWait(self.driver, 10).until(lambda d: len(d.window_handles) > 1)
+        self.driver.switch_to.window(self.driver.window_handles[-1])
+
+        if self.browser == "firefox":
+            time.sleep(5)
+            current_url = self.driver.current_url
+        else:
+            current_url = self.driver.current_url
+        self.logger.info(f"Redirected to URL: {current_url}")
+
+        self.assertEqual(current_url, ai_whatsapp_url, f"Not redirected to expected URL. Got: {current_url}")

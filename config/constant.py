@@ -1,6 +1,7 @@
 HEADLESS = True
 
 API_URL = "https://staging.sosyokmy.com/whitelabel-staging-2/public"
+BO_base_url = "https://staging.sosyokmy.com/whitelabel-staging-2/public"
 
 CREDENTIALS = {
     "valid_user": {
@@ -55,9 +56,19 @@ CREDENTIALS = {
         "invalid_voucher": "abc",
     },
     "image_url": "https://picsum.photos/200/300",
+    "BO_base_url": "https://staging.sosyokmy.com/whitelabel-staging-2/public",
     "image_path": "test_deposit.jpg",
     "BO_testing_url": "https://staging.sosyokmy.com/whitelabel-test/public",
     "BO_base_url": "https://staging.sosyokmy.com/whitelabel-staging-2/public",
+    "Get4dHistory": "{BO_base_url}/api/user-4d-records-history",
+    "Add4dCards": "{BO_base_url}/api/qa-redeem-fourd-card",
+    "Bet4d": "{BO_base_url}/api/qa-bet-fourd",
+    "UpdateBetResult": "{BO_base_url}/api/qa-update-bet-result",
+    "GetAllPromotion": "{BO_base_url}/api/promotion",
+    "GetUser": "{BO_base_url}/api/user",
+    "GetProvider": "{BO_base_url}/api/all/plat",
+    "GetHome": "{BO_base_url}/api/home",
+    "RandomGame": "{BO_base_url}/api/games?is_mobile=true&game_id=22172",
     "RejectDepositRequest": "{BO_base_url}/api/recharge/refuse/batch?user_ids[]={ID}&pass=123456",
     "ProcessingDepositRequest": "{BO_base_url}/api/recharge/process/batch?user_ids[]={ID}&pass=123456",
     "ApproveDepositRequest": "{BO_base_url}/api/recharge/approve?user_ids[]={ID}&pass=123456",
@@ -69,15 +80,16 @@ CREDENTIALS = {
     "SpecifyDateHistory": "{BO_base_url}/api/filter-records-by-date?type={record_type_value}&page=1&from={start_date}&to={end_date}",
     "DateHistory": "{BO_base_url}/api/filter-records-by-date?type={record_type_value}&page=1&date={date_option_id}",
     "PlaceBet": "{BO_base_url}/api/simulate-game-records?passcode=99999&user_id={userID}&amount={transfer_amount}&type={type}&provider_id={game_id}&game_record_date={game_record_date}",
-    "CreateDownline": "{BO_base_url}/api/qa-generate-user?pass=123456&user_id={userID}&t2=1&t3=1",
+    "CreateDownline": "{BO_base_url}/api/qa-generate-user?pass=123456&user_id={userID}&t2={number_of_t2}&t3={number_of_t3}",
     "CreateRebate": "{BO_base_url}/api/qa-calculate-rebate?pass=123456&user_ids={userID}&month={current_month}",
     "CheckRebatePercentage": "{BO_base_url}/api/qa-rebate-list?pass=123456",
-    "Get4dHistory": "{BO_base_url}/api/user-4d-records-history",
-    "Add4dCards": "{BO_base_url}/api/qa-redeem-fourd-card",
-    "Bet4d": "{BO_base_url}/api/qa-bet-fourd",
-    "UpdateBetResult": "{BO_base_url}/api/qa-update-bet-result",
-    "GetAllPromotion": "{BO_base_url}/api/promotion",
-    "GetUser": "{BO_base_url}/api/user",
+    "ApproveRebate": "{BO_base_url}/api/qa-approve-rebate?pass=123456&user_ids={userID}",
+    "ContactUs": "{BO_base_url}/api/cmsValue?key=contact_us",
+    "LeaderBoardTnc": "{BO_base_url}/api/promotion/tnc",
+    "CheckRanking": "{BO_base_url}/api/leaderboard?refresh=true",
+    "RebateDownlineRecord": "{BO_base_url}/api/agent/downline?",
+    "RebateAllRecord": "{BO_base_url}/api/agent?",
+    "RebateBetRecord": "{BO_base_url}/api/agent/betrecords?",
 }
 
 LANGUAGE_SETTINGS = {
@@ -203,7 +215,10 @@ LANGUAGE_SETTINGS = {
         "history": {
             "no_record": "No data available",
         },
-        "4d":{
+        "rebate": {
+            "no_record": "没有数据",
+        },
+        "4d": {
             "card_name": "BOBO万字卡",
             "4d_card": "万字卡",
             "4d_card_receipt": "万字卡",
@@ -212,6 +227,27 @@ LANGUAGE_SETTINGS = {
         },
         "promotion": {
             "claim": "领取",
+        },
+        "home_page": {
+            "history": "转账记录",
+            "deposit": "存款",
+            "withdraw": "提款",
+            "transfer": "转移",
+            "rebate": "即时返水",
+            "claim_play_now": "领取 & 开始游戏",
+            "game_balance": "游戏余额: MYR{balance}",
+            "buy_in_date": "买入日期:{date}",
+            "slots": "老虎机",
+            "4d": "4D",
+            "live_casino": "真人娱乐",
+            "sports": "足球",
+            "esports": "电子竞技",
+            "fishing": "捕鱼",
+            "fast_game": "快速游戏",
+            "other": "其他",
+            "no_search_result_1": "未找到与匹配的娱乐游戏",
+            "no_search_result_2": "No providers found matching your search term.",
+            "wallet_balance": "MYR {balance}",
         },
         "profile": {
             "balance": "总余额",
@@ -348,7 +384,10 @@ LANGUAGE_SETTINGS = {
         "history": {
             "no_record": "No data available",
         },
-        "4d":{
+        "rebate": {
+            "no_record": "No data available",
+        },
+        "4d": {
             "card_name": "BOBO Card",
             "4d_card": "4D Card",
             "4d_card_receipt": "4D Card",
@@ -357,6 +396,27 @@ LANGUAGE_SETTINGS = {
         },
         "promotion": {
             "claim": "Claim",
+        },
+        "home_page": {
+            "history": "History",
+            "deposit": "Deposit",
+            "withdraw": "Withdraw",
+            "transfer": "Transfer",
+            "rebate": "Rebate",
+            "claim_play_now": "Claim & Play",
+            "game_balance": "Game Balance: MYR{balance}",
+            "buy_in_date": "Buy In Date:{date}",
+            "slots": "SLOT",
+            "4d": "4D",
+            "live_casino": "CASINO",
+            "sports": "SPORTS",
+            "esports": "E-SPORT",
+            "fishing": "FISHING",
+            "fast_game": "FAST GAME",
+            "other": "OTHER",
+            "no_search_result_1": "No entertainment games found matching",
+            "no_search_result_2": "No providers found matching your search term.",
+            "wallet_balance": "MYR {balance}",
         },
         "profile":{
             "balance": "Balance",
@@ -495,7 +555,10 @@ LANGUAGE_SETTINGS = {
         "history": {
             "no_record": "No data available",
         },
-        "4d":{
+        "rebate": {
+            "no_record": "Tiada data tersedia",
+        },
+        "4d": {
             "card_name": "BOBO Kad",
             "4d_card": "4D Kad",
             "4d_card_receipt": "4D Card",
@@ -504,6 +567,27 @@ LANGUAGE_SETTINGS = {
         },
         "promotion": {
             "claim": "Tuntut",
+        },
+        "home_page": {
+            "history": "Transaksi",
+            "deposit": "Deposit",
+            "withdraw": "Cuci",
+            "transfer": "Pindahan",
+            "rebate": "Rebat",
+            "claim_play_now": "Tuntut & Main",
+            "game_balance": "Baki Game: MYR{balance}",
+            "buy_in_date": "Tarikh Beli:{date}",
+            "slots": "SLOTS",
+            "4d": "4D",
+            "live_casino": "KASINO",
+            "sports": "SUKAN",
+            "esports": "E-SUKAN",
+            "fishing": "MEMANCING",
+            "fast_game": "GAME PANTAS",
+            "other": "OTHER",
+            "no_search_result_1": "Tiada permainan hiburan ditemui sepadan dengan",
+            "no_search_result_2": "No providers found matching your search term.",
+            "wallet_balance": "MYR {balance}",
         },
         "profile":{
             "balance": "Jumlah Baki",
@@ -525,7 +609,7 @@ LANGUAGE_SETTINGS = {
 PROFILE_URL = {
     "large_image_url": "https://sample-files.com/downloads/images/jpg/landscape_hires_4000x2667_6.83mb.jpg",
     "replace_image_url": "https://bobo-bucket.s3.ap-southeast-1.amazonaws.com/whitelabel/default-profile/AvatarP1.png",
-    "valid_image_url": "https://bobo-bucket.s3.ap-southeast-1.amazonaws.com/chatbot/chatbot_avatar.png",
+    "valid_image_url": "https://www.kasandbox.org/programming-images/avatars/cs-hopper-cool.png",
     "invalid_format_url": "https://sample-files.com/downloads/documents/txt/simple.txt",
 }
 
@@ -536,4 +620,4 @@ LIVE_AGENT_URL = {
     "profile_whatsapp_url": "https://api.whatsapp.com/send/?phone=60104254518&text&type=phone_number&app_absent=0",
 }
 
-FOUR_D_PRIZES = [3400,1200,600,210,80]
+FOUR_D_PRIZES = [3400, 1200, 600, 210, 80]
